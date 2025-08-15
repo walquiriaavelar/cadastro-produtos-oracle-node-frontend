@@ -1,114 +1,120 @@
+// api.js — Router da API
 const express = require('express');
-const cors = require('cors');
-const oracledb = require('oracledb');
+const router = express.Router();
+const db = require('./db/oracle');
 
-const app = express();
-const PORT = 3000;
-
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-const dbConfig = {
-  user: 'SYSTEM',      
-  password: 'root',      
-  connectString: 'localhost/XE' 
-};
-
-app.get('/produtos', async (req, res) => {
+/**
+ * POST /api/auth/login
+ * Valida usuário (CADUSU): CODUSU/MNUINI + status.
+ */
+router.post('/auth/login', async (req, res) => {
+  const { usuario, senha } = req.body || {};
+  if (!usuario || !senha) {
+    return res.status(400).json({ ok: false, mensagem: 'Informe usuário e senha.' });
+  }
   try {
-    const conn = await oracledb.getConnection(dbConfig);
-    const result = await conn.execute(
-      'BEGIN LISTAR_PRODUTOS(:cursor); END;',
-      { cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-      }
+    const r = await db.query(
+      `SELECT codusu, nomusu, codemp, situs u AS situs, NVL(evlsen,0) AS evlsen
+         FROM cadusu
+        WHERE UPPER(codusu) = :usuario
+          AND mnuini = :senha`,
+      { usuario: usuario.toUpperCase(), senha }
     );
 
-    const resultSet = result.outBinds.cursor;
-    const rows = [];
-    let row;
+    const row = r.rows?.[0];
+    if (!row)                 return res.status(401).json({ ok:false, mensagem:'Usuário/senha inválidos.' });
+    if (row.SITUS === 'I')    return res.status(403).json({ ok:false, mensagem:'Usuário inativo.' });
+    if (Number(row.EVLSEN))   return res.status(403).json({ ok:false, mensagem:'Usuário bloqueado.' });
 
-    while ((row = await resultSet.getRow())) {
-      rows.push({
-        id: row[0],
-        nome: row[1],
-        preco: row[2],
-        quantidade: row[3],
-      });
-    }
-
-    await resultSet.close();
-    await conn.close();
-
-    res.status(200).json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ erro: 'Erro ao buscar produtos.' });
+    return res.json({ ok:true, nome: row.NOMUSU, codemp: row.CODEMP });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok:false, mensagem:'Erro no login.' });
   }
 });
 
-app.post('/produtos', async (req, res) => {
-  let conn;
-  let { nome, preco, quantidade } = req.body;
+/**
+ * GET /api/linhas-produto
+ * Retorna linhas (ex.: SEQAGR RLT). Ajuste a origem conforme seu modelo.
+ */
+router.get('/linhas-produto', async (_req, res) => {
+  try {
+    const r = await db.query(`
+      SELECT DISTINCT codgru, desgru
+        FROM seqagrrlt
+       ORDER BY codgru
+    `);
+    const rows = r.rows.map(x => ({
+      codgru: x.CODGRU ?? x[0],
+      desgru: x.DESGRU ?? x[1],
+    }));
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ erro: 'Erro ao buscar linhas' });
+  }
+});
 
-  preco = parseFloat(preco.toString().replace(',', '.'));
+/**
+ * GET /api/familias-produto?linha=<valor>
+ * Retorna famílias vinculadas à linha.
+ */
+router.get('/familias-produto', async (req, res) => {
+  const { linha } = req.query;
+  if (!linha) return res.status(400).json({ erro: 'Parâmetro "linha" obrigatório' });
 
-  if (!nome || isNaN(preco) || !quantidade) {
-    return res.status(400).json({ erro: 'Todos os campos devem ser preenchidos corretamente.' });
+  try {
+    const r = await db.query(
+      `SELECT DISTINCT b.codfam, b.desfam
+         FROM agrfamrlt a
+         JOIN nucfam b ON a.codemp = b.codemp AND a.codfam = b.codfam
+        WHERE a.codgru = :linha
+        ORDER BY b.codfam`,
+      { linha }
+    );
+    const rows = r.rows.map(x => ({
+      codfam: x.CODFAM ?? x[0],
+      desfam: x.DESFAM ?? x[1],
+    }));
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ erro: 'Erro ao buscar famílias de produto' });
+  }
+});
+
+/**
+ * GET /api/produtos
+ * Placeholder — ajuste depois para sua fonte real.
+ */
+router.get('/produtos', async (_req, res) => {
+  res.json([]);
+});
+
+/**
+ * POST /api/produtos
+ * Chama a procedure INSERIR_PRODUTO (exemplo). Usa autoCommit.
+ */
+router.post('/produtos', async (req, res) => {
+  const { nome, unidade, linha, familia, largura, comprimento } = req.body || {};
+
+  const nLarg = Number(largura);
+  const nComp = Number(comprimento);
+  if (!nome || !unidade || !linha || !familia || Number.isNaN(nLarg) || Number.isNaN(nComp)) {
+    return res.status(400).json({ erro: 'Todos os campos devem ser informados corretamente.' });
   }
 
   try {
-    conn = await oracledb.getConnection(dbConfig);
-    await conn.execute(
-      `BEGIN INSERIR_PRODUTO(:nome, :preco, :quantidade); END;`,
-      { nome, preco, quantidade }
+    await db.query(
+      `BEGIN INSERIR_PRODUTO(:nome, :unidade, :linha, :familia, :largura, :comprimento); END;`,
+      { nome, unidade, linha, familia, largura: nLarg, comprimento: nComp },
+      { autoCommit: true }
     );
-    await conn.commit();
-    res.json({ mensagem: 'Produto inserido com sucesso!' });
-  } catch (err) {
-    console.error('Erro:', err);
+    res.status(201).json({ ok: true, mensagem: 'Produto inserido com sucesso.' });
+  } catch (e) {
+    console.error('Erro ao chamar INSERIR_PRODUTO:', e);
     res.status(500).json({ erro: 'Erro ao inserir produto.' });
-  } finally {
-    if (conn) await conn.close();
   }
 });
 
-app.put('/produtos/:id', async (req, res) => {
-  const { id } = req.params;
-  const { nome, preco, quantidade } = req.body;
-
-  try {
-    const conn = await oracledb.getConnection(dbConfig);
-    await conn.execute(
-      'BEGIN ATUALIZAR_PRODUTO(:id, :nome, :preco, :quantidade); END;',
-    { id: parseInt(id), nome, preco, quantidade }
-    );
-    await conn.commit();
-    await conn.close();
-    res.status(200).json({ mensagem: 'Produto atualizado com sucesso.' });
-  } catch (err) {
-     console.error(err);
-    res.status(500).json({ erro: 'Erro ao atualizar o produto.' });
-  }
-});
-
-app.delete('/produtos/:id', async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const conn = await oracledb.getConnection(dbConfig);
-    await conn.execute(
-      `BEGIN DELETAR_PRODUTO(:id); END;`,
-      { id: parseInt(id) }
-    );
-    await conn.close();
-    res.status(200).json({ mensagem: 'Produto deletado com sucesso.' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ erro: 'Erro ao deletar o produto.' });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 API rodando em http://localhost:${PORT}`);
-});
+module.exports = router;

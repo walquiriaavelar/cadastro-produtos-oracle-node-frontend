@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    container_name: cadastro-produto
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      # Garante defaults se faltarem no .env
+      ORACLE_PORT: ${ORACLE_PORT:-1521}
+      PORT: ${PORT:-3000}
+    # Se o DNS interno "dundee.haco.local" não resolver no container,
+    # descomente uma das opções abaixo:
+
+    # 1) Mapear DNS do container (informe seu DNS corporativo)
+    # dns:
+    #   - 10.0.0.10
+
+    # 2) Mapear host estático (informe o IP do dundee)
+    # extra_hosts:
+    #   - "dundee.haco.local:10.0.0.20"
+
+    # 3) Usar a rede do host (Linux) para herdar resolução de DNS/VPN
+    # network_mode: "host"  # ⚠ em Windows/Mac não funciona como no Linux
+
+    restart: unless-stopped

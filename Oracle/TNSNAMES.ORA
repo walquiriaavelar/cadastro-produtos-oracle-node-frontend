@@ -1,0 +1,38 @@
+HACO.world = 
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS =
+        (COMMUNITY = tcp.world)
+        (PROTOCOL = TCP)
+        (Host = F50)
+        (Port = 1521)
+       )
+        (ADDRESS =
+          (COMMUNITY = tcp.world)
+          (PROTOCOL = TCP)
+          (Host = F50)
+          (Port = 1526)
+        )
+    )
+    (CONNECT_DATA =(SID = HACO)
+    )
+  )
+DBTESTE.world = 
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS =
+        (COMMUNITY = tcp.world)
+        (PROTOCOL = TCP)
+        (Host = dundee.haco.local)
+        (Port = 1521)
+       )
+        (ADDRESS =
+          (COMMUNITY = tcp.world)
+          (PROTOCOL = TCP)
+          (Host = dundee.haco.local)
+          (Port = 1526)
+        )
+    )
+    (CONNECT_DATA =(SID = DBTESTE)
+    )
+  )

@@ -1,95 +1,317 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Cadastro de Produto</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script defer src="app.js"></script>
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
-    <h1 class="text-2xl font-bold mb-6">Cadastro de Produto</h1>
-    <form id="product-form" class="space-y-4">
-      <div>
-        <label for="name" class="block font-medium">Nome</label>
-        <input type="text" id="name" class="w-full border p-2 rounded" required>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cadastro de Produto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <header class="bg-white border-b sticky top-0 z-10">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <h1 class="text-xl md:text-2xl font-semibold">Cadastro de Produto</h1>
+        <div class="flex gap-2">
+          <button form="form-produto" type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Salvar</button>
+          <button type="button" class="px-4 py-2 rounded-lg border" onclick="document.getElementById('form-produto').reset()">Limpar</button>
+        </div>
       </div>
-      <div>
-        <label for="price" class="block font-medium">Preço</label>
-        <input type="number" id="price" class="w-full border p-2 rounded" step="0.01" required>
-      </div>
-      <div>
-        <label for="quantity" class="block font-medium">Quantidade</label>
-        <input type="number" id="quantity" class="w-full border p-2 rounded" required>
-      </div>
-      <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-        Salvar
-      </button>
-    </form>
-    <p id="message" class="mt-4 text-center text-sm text-green-600 hidden"></p>
-  </div>
-</body>
-</html>
-<hr>
-<h2>Produtos Cadastrados</h2>
-<button onclick="listarProdutos()">🔄 Atualizar lista</button>
-<ul id="lista-produtos" class="mt-2 list-disc pl-6"></ul>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("product-form");
-    const mensagem = document.getElementById("message");
+    </header>
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    <main class="max-w-7xl mx-auto px-4 py-6">
+      <form id="form-produto" class="space-y-6">
+        <!-- IDENTIFICAÇÃO -->
+        <section class="bg-white rounded-xl shadow p-4 md:p-6">
+          <header class="mb-4">
+            <h2 class="text-lg md:text-xl font-semibold">Identificação</h2>
+            <p class="text-sm text-gray-500">Campos básicos do produto</p>
+          </header>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium">Produto</label>
+              <input id="codigo" type="text" class="mt-1 w-full rounded-lg border p-2" placeholder="ex.: 0100120639" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium">Nome</label>
+              <input id="nome" type="text" class="mt-1 w-full rounded-lg border p-2" placeholder="Descrição do produto" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Referência</label>
+              <input id="referencia" type="text" class="mt-1 w-full rounded-lg border p-2" placeholder="Código referencial" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Unidade</label>
+              <select id="unidade" class="mt-1 w-full rounded-lg border p-2">
+                <option value="">Selecione</option>
+                <option value="PC">PC</option>
+                <option value="MT">MT</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Linha Produto</label>
+              <input id="linha-produto" type="text" class="mt-1 w-full rounded-lg border p-2" placeholder="ex.: 01" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Família Produto</label>
+              <input id="familia" type="text" class="mt-1 w-full rounded-lg border p-2" placeholder="ex.: 101" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Grupo Produto</label>
+              <input id="grupo-produto" type="text" class="mt-1 w-full rounded-lg border p-2" placeholder="ex.: CRIACAO MARKETING" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Produto Infologia</label>
+              <input id="produto-infologia" type="text" class="mt-1 w-full rounded-lg border p-2" placeholder="ex.: 600500109851" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Produto Base</label>
+              <input id="produto-base" type="text" class="mt-1 w-full rounded-lg border p-2" placeholder="Código produto base" />
+            </div>
+          </div>
+        </section>
 
-      const produto = {
-        nome: document.getElementById("name").value,
-        preco: parseFloat(document.getElementById("price").value),
-        quantidade: parseInt(document.getElementById("quantity").value)
+        <!-- MEDIDAS -->
+        <section class="bg-white rounded-xl shadow p-4 md:p-6">
+          <header class="mb-4">
+            <h2 class="text-lg md:text-xl font-semibold">Medidas</h2>
+          </header>
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+              <label class="block text-sm font-medium">Largura</label>
+              <input id="largura" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" placeholder="mm" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Comprimento</label>
+              <input id="comprimento" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" placeholder="mm" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Compr. Figura</label>
+              <input id="cmp-figura" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" placeholder="mm" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Compr. Fita</label>
+              <input id="cmp-fita" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" placeholder="mm" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Compr. Dobra</label>
+              <input id="cmp-dobra" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" placeholder="mm" />
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium">Medida Acabada 1 - Largura</label>
+              <input id="acabado1-largura" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Medida Acabada 1 - Comprimento</label>
+              <input id="acabado1-comprimento" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Medida Acabada 2 - Largura</label>
+              <input id="acabado2-largura" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Medida Acabada 2 - Comprimento</label>
+              <input id="acabado2-comprimento" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+          </div>
+        </section>
+
+        <!-- CARACTERÍSTICAS -->
+        <section class="bg-white rounded-xl shadow p-4 md:p-6">
+          <header class="mb-4">
+            <h2 class="text-lg md:text-xl font-semibold">Características</h2>
+          </header>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium">Destino Produto</label>
+              <input id="destino-produto" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Corte e Dobra (tipo)</label>
+              <input id="tipo-corte-dobra" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Origem Ideia</label>
+              <input id="origem-ideia" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Marca</label>
+              <input id="marca" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Cliente Detentor Marca</label>
+              <input id="cliente-detentor" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Tipo Manequim</label>
+              <input id="tipo-manequim" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Modelo Recorte 1</label>
+              <input id="modelo-recorte-1" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Modelo Recorte 2</label>
+              <input id="modelo-recorte-2" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Grupo Preço</label>
+              <input id="grupo-preco" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Unidades por Rolo</label>
+              <input id="unidades-rolo" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Metros por Rolo</label>
+              <input id="metros-rolo" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Tipo Fundo</label>
+              <input id="tipo-fundo" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Tipo Ourela</label>
+              <input id="tipo-ourela" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+          </div>
+        </section>
+
+        <!-- APLICAÇÃO / PROCESSO -->
+        <section class="bg-white rounded-xl shadow p-4 md:p-6">
+          <header class="mb-4">
+            <h2 class="text-lg md:text-xl font-semibold">Aplicação & Processo</h2>
+          </header>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium">Origem Enrolamento</label>
+              <input id="origem-enrolamento" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Tempo Recorte</label>
+              <input id="tempo-recorte" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Corte Laser</label>
+              <input id="corte-laser" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Local Aplicação</label>
+              <input id="local-aplicacao" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div class="md:col-span-2 flex items-center gap-6">
+              <label class="inline-flex items-center gap-2">
+                <input id="estonar" type="checkbox" class="rounded border-gray-300" />
+                <span>Estonar/Tinturar</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input id="tipo-ambiente" type="checkbox" class="rounded border-gray-300" />
+                <span>Tipo Ambiente (preencher abaixo)</span>
+              </label>
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Temperatura Submetida (°C)</label>
+              <input id="temperatura" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+          </div>
+        </section>
+
+        <!-- EMBALAGEM / ESTOQUE -->
+        <section class="bg-white rounded-xl shadow p-4 md:p-6">
+          <header class="mb-4">
+            <h2 class="text-lg md:text-xl font-semibold">Embalagem & Estoque</h2>
+          </header>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium">Acondicionamento (código)</label>
+              <input id="acondicionamento" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Qtd Acondicionamento</label>
+              <input id="qtd-acondicionamento" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Embalagem (código)</label>
+              <input id="embalagem" type="text" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Qtd Embalagem</label>
+              <input id="qtd-embalagem" type="number" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+          </div>
+        </section>
+
+        <!-- ACABAMENTOS (GRADE) -->
+        <section class="bg-white rounded-xl shadow p-4 md:p-6">
+          <header class="mb-4 flex items-center justify-between">
+            <div>
+              <h2 class="text-lg md:text-xl font-semibold">Acabamentos & Infos Complementares</h2>
+              <p class="text-sm text-gray-500">Adicione linhas conforme necessário</p>
+            </div>
+            <button type="button" id="btn-add-linha" class="px-3 py-2 rounded-lg border hover:bg-gray-50">Adicionar linha</button>
+          </header>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-100 text-gray-700">
+                <tr>
+                  <th class="p-2 text-left">Código</th>
+                  <th class="p-2 text-left">Desc Qtd 1</th>
+                  <th class="p-2 text-left">Qtd 1</th>
+                  <th class="p-2 text-left">Desc Qtd 2</th>
+                  <th class="p-2 text-left">Qtd 2</th>
+                  <th class="p-2 text-left">Desc Qtd 3</th>
+                  <th class="p-2 text-left">Qtd 3</th>
+                  <th class="p-2 text-left">Desc Texto</th>
+                  <th class="p-2 text-left">Texto</th>
+                  <th class="p-2"></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-acabamentos"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Mensagem -->
+        <p id="mensagem" class="hidden text-center text-sm"></p>
+      </form>
+    </main>
+
+    <script>
+      // helper para criar input padrão
+      const input = (name, placeholder = "") => `<input name="${name}" class=\"w-full rounded-lg border p-2\" placeholder=\"${placeholder}\" />`;
+
+      const tbody = document.getElementById('tbody-acabamentos');
+      const addLinha = () => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b last:border-b-0';
+        tr.innerHTML = `
+          <td class="p-2 min-w-[8rem]">${input('acab_cod')}</td>
+          <td class="p-2 min-w-[8rem]">${input('acab_desc_q1')}</td>
+          <td class="p-2 min-w-[6rem]">${input('acab_q1')}</td>
+          <td class="p-2 min-w-[8rem]">${input('acab_desc_q2')}</td>
+          <td class="p-2 min-w-[6rem]">${input('acab_q2')}</td>
+          <td class="p-2 min-w-[8rem]">${input('acab_desc_q3')}</td>
+          <td class="p-2 min-w-[6rem]">${input('acab_q3')}</td>
+          <td class="p-2 min-w-[8rem]">${input('acab_desc_tx')}</td>
+          <td class="p-2 min-w-[10rem]">${input('acab_tx')}</td>
+          <td class="p-2 text-right"><button type="button" class="px-2 py-1 text-red-600 hover:bg-red-50 rounded" onclick="this.closest('tr').remove()">Remover</button></td>
+        `;
+        tbody.appendChild(tr);
       };
+      document.getElementById('btn-add-linha').addEventListener('click', addLinha);
+      // adiciona ao menos uma linha por padrão
+      addLinha();
 
-      try {
-        const res = await fetch('http://localhost:3000/produtos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(produto)
-        });
-
-        const json = await res.json();
-        console.log("Resposta da API:", json);
-
-        mensagem.textContent = "✅ Produto enviado com sucesso!";
-        mensagem.classList.remove("hidden");
-        mensagem.classList.remove("text-red-600");
-        mensagem.classList.add("text-green-600");
-
-      } catch (err) {
-        console.error("Erro:", err);
-        mensagem.textContent = "❌ Erro ao enviar o produto.";
-        mensagem.classList.remove("hidden");
-        mensagem.classList.remove("text-green-600");
-        mensagem.classList.add("text-red-600");
-      }
-    });
-  });
-</script>
-<script>
-  async function listarProdutos() {
-    try {
-      const res = await fetch('http://localhost:3000/produtos');
-      const produtos = await res.json();
-
-      const lista = document.getElementById('lista-produtos');
-      lista.innerHTML = '';
-
-      produtos.forEach(prod => {
-        const item = document.createElement('li');
-        item.textContent = `🛒 ${prod.nome} - R$ ${prod.preco} (${prod.quantidade} un.)`;
-        lista.appendChild(item);
+      // submissão dummy (sem validações)
+      document.getElementById('form-produto').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const msg = document.getElementById('mensagem');
+        msg.classList.remove('hidden');
+        msg.className = 'text-center text-green-600';
+        msg.textContent = 'Formulário pronto para integração no n8n.';
       });
-    } catch (err) {
-      console.error('Erro ao buscar produtos:', err);
-      alert('❌ Não foi possível carregar os produtos.');
-    }
-  }
-</script>
+    </script>
+  </body>
+</html>

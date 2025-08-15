@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entrar • Cadastro de Produto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-dvh bg-gray-50 flex items-center justify-center p-4">
+    <main class="w-full max-w-md">
+      <div class="bg-white rounded-2xl shadow p-6 md:p-8">
+        <header class="mb-6 text-center">
+          <h1 class="text-2xl font-semibold">HACO ETIQUETAS</h1>
+          <p class="text-sm text-gray-500">Informe suas credenciais para continuar</p>
+        </header>
+
+        <form id="login-form" class="space-y-4">
+          <div>
+            <label for="usuario" class="block text-sm font-medium">Usuário ou e-mail</label>
+            <input id="usuario" name="usuario" type="text" autocomplete="username" class="mt-1 w-full rounded-lg border p-2" placeholder="seu.usuario@empresa.com" />
+          </div>
+
+          <div>
+            <label for="senha" class="block text-sm font-medium">Senha</label>
+            <div class="mt-1 relative">
+              <input id="senha" name="senha" type="password" autocomplete="current-password" class="w-full rounded-lg border p-2 pr-10" placeholder="••••••••" />
+              <button type="button" id="toggle-pass" class="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-600 px-2">Mostrar</button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-sm">
+            <label class="inline-flex items-center gap-2">
+              <input id="lembrar" name="lembrar" type="checkbox" class="rounded border-gray-300" />
+              <span>Lembrar-me</span>
+            </label>
+            <a href="#" class="text-blue-600 hover:underline">Esqueci minha senha</a>
+          </div>
+
+          <button type="submit" class="w-full py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Entrar</button>
+
+          <p id="msg" class="hidden text-center text-sm"></p>
+        </form>
+      </div>
+
+      <p class="mt-6 text-center text-xs text-gray-500">© <span id="ano"></span> Haco — Cadastro de Produto</p>
+    </main>
+
+    <script>
+      // Mostrar/ocultar senha
+      const senha = document.getElementById('senha');
+      const toggle = document.getElementById('toggle-pass');
+      toggle.addEventListener('click', () => {
+        const visible = senha.type === 'text';
+        senha.type = visible ? 'password' : 'text';
+        toggle.textContent = visible ? 'Mostrar' : 'Ocultar';
+      });
+
+      // Submissão fake (sem validação; n8n fará isso). Redireciona para index.html.
+      document.getElementById('login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const msg = document.getElementById('msg');
+        msg.className = 'text-center text-green-600';
+        msg.textContent = 'Autenticando…';
+        setTimeout(() => {
+          // Aqui você pode trocar por fetch() para seu endpoint do n8n
+          window.location.href = './index.html';
+        }, 600);
+      });
+
+      // Ano no rodapé
+      document.getElementById('ano').textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
